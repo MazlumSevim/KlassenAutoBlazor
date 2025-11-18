@@ -3,209 +3,117 @@
 @using KlasseAuto.Blazor.Data
 @inject WeatherApiService WeatherService
 
-<h3>Wetter – mehrere Städte</h3>
+<h3>Wetter</h3>
 
 <div class="mb-3">
-    <label for="cityInput">Neue Stadt:</label>
+    <label for="cityInput">Stadt:</label>
     <input id="cityInput"
-       class="form-control"
-       style="max-width:250px; display:inline-block; margin-right:0.5rem;"
-       @bind="_newCity" />
+           class="form-control"
+           style="max-width:250px; display:inline-block; margin-right:0.5rem;"
+           @bind="_city" />
 
-
-    <button type="button" class="btn btn-primary" @onclick="AddCity">
+    <button type="button" class="btn btn-primary" @onclick="LoadWeather">
         Stadt hinzufügen
     </button>
 </div>
 
-@if (!string.IsNullOrEmpty(_globalError))
+@if (!string.IsNullOrEmpty(_error))
 {
     <div class="alert alert-danger">
-        Fehler: @_globalError
+        Fehler: @_error
     </div>
 }
 
-@if (!_cities.Any())
+@if (_result is null && string.IsNullOrEmpty(_error))
 {
-    <p>Noch keine Städte hinzugefügt. Gib oben eine Stadt ein (z. B. Berlin, London, Istanbul) und klick auf „Stadt hinzufügen“.</p>
+    <p>Bitte gib eine Stadt ein (z. B. Berlin, Istanbul, London) und klicke auf „Laden“.</p>
 }
-else
+else if (_result is not null)
 {
-    @foreach (var city in _cities)
+    <h4>Aktuelles Wetter – @_result.City</h4>
+
+    <p>
+        @if (!string.IsNullOrWhiteSpace(_result.Current.Icon))
+        {
+            <img src="@GetIconUrl(_result.Current.Icon)"
+                 alt="@_result.Current.Description"
+                 style="width:80px;height:80px;margin-right:12px;image-rendering:auto;" />
+        }
+
+        <strong>@_result.Current.TemperatureC.ToString("0 ") °C</strong><br />
+        @_result.Current.Description<br />
+        Stand: @_result.Current.Time.ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture)
+    </p>
+
+    <h4>Vorhersage (nächste Tage)</h4>
+
+    <table class="table table-striped table-hover table-sm">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th></th>
+                <th>Temperatur</th>
+                <th>Beschreibung</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in _result.Forecast)
+            {
+                <tr>
+                    <td>@f.Date.ToString("ddd, dd.MM.yyyy", CultureInfo.CurrentCulture)</td>
+                    <td class="text-center" style="vertical-align:middle;">
+    @if (!string.IsNullOrWhiteSpace(f.Icon))
     {
-        <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>@city.Name</strong>
-
-                <div>
-                    <button type="button"
-                            class="btn btn-sm btn-secondary"
-                            @onclick="() => ReloadCity(city)">
-                        Aktualisieren
-                    </button>
-
-                    <button type="button"
-                            class="btn btn-sm btn-danger"
-                            style="margin-left:0.5rem;"
-                            @onclick="() => RemoveCity(city)">
-                        Löschen
-                    </button>
-                </div>
-            </div>
-
-            <div class="card-body">
-                @if (!string.IsNullOrEmpty(city.Error))
-                {
-                    <div class="alert alert-danger">
-                        Fehler für @city.Name: @city.Error
-                    </div>
-                }
-                else if (city.IsLoading)
-                {
-                    <p>Wetter für @city.Name wird geladen…</p>
-                }
-                else if (city.Data is null)
-                {
-                    <p>Keine Daten für @city.Name.</p>
-                }
-                else
-                {
-                    <h5>Aktuelles Wetter</h5>
-                    <p>
-                        <strong>@city.Data.Current.TemperatureC.ToString("0.#") °C</strong><br />
-                        @city.Data.Current.Description<br />
-                        Stand: @city.Data.Current.Time.ToString("dd.MM.yyyy HH:mm", CultureInfo.CurrentCulture)
-                    </p>
-
-                    <h5>Vorhersage (nächste Tage)</h5>
-
-                    @if (city.Data.Forecast is null || !city.Data.Forecast.Any())
-                    {
-                        <p>Keine Vorhersage verfügbar.</p>
-                    }
-                    else
-                    {
-                        <table class="table table-striped table-hover table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Datum</th>
-                                    <th>Temp. (°C)</th>
-                                    <th>Beschreibung</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var f in city.Data.Forecast)
-                                {
-                                    <tr>
-                                        <td>@f.Date.ToString("ddd, dd.MM.yyyy", CultureInfo.CurrentCulture)</td>
-                                        <td>@f.TemperatureC.ToString("0.#")</td>
-                                        <td>@f.Description</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                }
-            </div>
-        </div>
+        <img src="@GetIconUrl(f.Icon)"
+             alt="@f.Description"
+             style="width:60px;height:60px;image-rendering:auto;" />
     }
+</td>
+
+                    <td>@f.TemperatureC.ToString("0 ") °C</td>
+                    <td>@f.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 
 @code {
-    private string _newCity = string.Empty;
+    private string _city = string.Empty;
+    private bool _isLoading = false;
+    private string? _error;
+    private CityWeatherResult? _result;   // <-- WICHTIG! Dadurch ist _result NICHT MEHR ROT
 
-    // Falls mal global etwas schiefgeht
-    private string? _globalError;
-
-    private readonly List<CityWeatherViewModel> _cities = new();
-
-    protected override async Task OnInitializedAsync()
+    private async Task LoadWeather()
     {
-        // Optional: Standard-Stadt beim Start laden
-        // await AddCityInternal("Berlin");
-    }
-
-    private async Task AddCityInternal(string cityName)
-    {
-        cityName = cityName.Trim();
-
-        if (string.IsNullOrWhiteSpace(cityName))
-            return;
-
-        // Stadt schon vorhanden?
-        if (_cities.Any(c => string.Equals(c.Name, cityName, StringComparison.OrdinalIgnoreCase)))
-            return;
-
-        var vm = new CityWeatherViewModel(cityName);
-        _cities.Add(vm);
-
-        await LoadDataForCity(vm);
-    }
-
-    private async Task LoadDataForCity(CityWeatherViewModel city)
-    {
-        city.Error = null;
-        city.IsLoading = true;
+        _error = null;
+        _isLoading = true;
+        _result = null;
         StateHasChanged();
 
         try
         {
-            var result = await WeatherService.GetWeatherForCityAsync(city.Name);
-            if (result is null)
-            {
-                city.Error = "Keine Daten gefunden. Stadtname korrekt?";
-                city.Data = null;
-            }
+            var res = await WeatherService.GetWeatherForCityAsync(_city);
+
+            if (res == null)
+                _error = "Keine Daten gefunden. Stadt korrekt?";
             else
-            {
-                city.Data = result;
-            }
+                _result = res;
         }
         catch (Exception ex)
         {
-            city.Error = ex.Message;
-            city.Data = null;
+            _error = ex.Message;
         }
-        finally
-        {
-            city.IsLoading = false;
-            StateHasChanged();
-        }
+
+        _isLoading = false;
+        StateHasChanged();
     }
 
-    private async Task AddCity()
+    private string GetIconUrl(string iconCode)
     {
-        _globalError = null;
+        if (string.IsNullOrWhiteSpace(iconCode))
+            return "";
 
-        if (string.IsNullOrWhiteSpace(_newCity))
-            return;
-
-        var cityName = _newCity;
-        _newCity = string.Empty;
-
-        await AddCityInternal(cityName);
-    }
-
-    private async Task ReloadCity(CityWeatherViewModel city)
-    {
-        await LoadDataForCity(city);
-    }
-
-    private void RemoveCity(CityWeatherViewModel city)
-    {
-        _cities.Remove(city);
-    }
-
-    private class CityWeatherViewModel
-    {
-        public string Name { get; }
-        public bool IsLoading { get; set; }
-        public string? Error { get; set; }
-        public CityWeatherResult? Data { get; set; }
-
-        public CityWeatherViewModel(string name)
-        {
-            Name = name;
-        }
+        return $"https://openweathermap.org/img/wn/{iconCode}@2x.png";
     }
 }

@@ -35,12 +35,15 @@ public class WeatherApiService
             return null;
 
         // Aktuelles Wetter
+        var currentWeatherInfo = current.Weather.FirstOrDefault();
+
         var currentWeather = new CurrentWeather
         {
             City = current.Name,
             TemperatureC = current.Main.Temp,
             Description = current.Weather.FirstOrDefault()?.Description ?? "Keine Beschreibung",
-            Time = DateTimeOffset.FromUnixTimeSeconds(current.Dt).LocalDateTime
+            Time = DateTimeOffset.FromUnixTimeSeconds(current.Dt).LocalDateTime,
+            Icon = currentWeatherInfo?.Icon ?? ""
         };
 
         // Vorhersage: pro Tag ein Wert (Mittagszeit, wenn vorhanden)
@@ -59,11 +62,14 @@ public class WeatherApiService
                     DateTimeOffset.FromUnixTimeSeconds(e.Dt).LocalDateTime.Hour - 12))
                 .First();
 
+            var atNoonWeather = atNoon.Weather.FirstOrDefault();
+
             items.Add(new ForecastItem
             {
                 Date = group.Key,
                 TemperatureC = atNoon.Main.Temp,
-                Description = atNoon.Weather.FirstOrDefault()?.Description ?? ""
+                Description = atNoon.Weather.FirstOrDefault()?.Description ?? "",
+                Icon = atNoonWeather?.Icon ?? "" 
             });
         }
 
@@ -105,6 +111,7 @@ public class MainInfo
 public class WeatherInfo
 {
     public string Description { get; set; } = "";
+    public string Icon { get; set; } = ""; 
 }
 
 // Modelle für deine App:
@@ -121,6 +128,7 @@ public class CurrentWeather
     public double TemperatureC { get; set; }
     public string Description { get; set; } = "";
     public DateTime Time { get; set; }
+    public string Icon { get; set; } = "";
 }
 
 public class ForecastItem
@@ -128,4 +136,5 @@ public class ForecastItem
     public DateOnly Date { get; set; }
     public double TemperatureC { get; set; }
     public string Description { get; set; } = "";
+    public string Icon { get; set; } = "";
 }
