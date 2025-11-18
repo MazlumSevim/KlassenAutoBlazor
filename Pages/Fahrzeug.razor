@@ -1,0 +1,127 @@
+@page "/fahrzeug"
+@using KlasseAuto.Blazor.Models
+
+<h3>Fahrzeug / Fahrer / Kunde</h3>
+
+<EditForm Model="_model" OnValidSubmit="OnSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <fieldset style="margin-bottom:1rem;">
+        <legend>Fahrer</legend>
+
+        <div>
+            <label style="display:inline-block; width:120px;">Vorname:</label>
+            <InputText @bind-Value="_model.FahrerVorname" />
+        </div>
+
+        <div>
+            <label style="display:inline-block; width:120px;">Nachname:</label>
+            <InputText @bind-Value="_model.FahrerNachname" />
+        </div>
+
+        <div>
+            <label>
+                <InputCheckbox @bind-Value="_model.HatFuehrerschein" />
+                Hat Führerschein
+            </label>
+        </div>
+    </fieldset>
+
+    <fieldset style="margin-bottom:1rem;">
+        <legend>Kunde</legend>
+
+        <div>
+            <label style="display:inline-block; width:120px;">Vorname:</label>
+            <InputText @bind-Value="_model.KundeVorname" />
+        </div>
+
+        <div>
+            <label style="display:inline-block; width:120px;">Nachname:</label>
+            <InputText @bind-Value="_model.KundeNachname" />
+        </div>
+    </fieldset>
+
+    <fieldset style="margin-bottom:1rem;">
+        <legend>Auto</legend>
+
+        <div>
+            <label style="display:inline-block; width:120px;">Marke:</label>
+            <InputText @bind-Value="_model.AutoMarke" />
+        </div>
+
+        <div>
+            <label style="display:inline-block; width:120px;">Besitzer (optional):</label>
+            <InputText @bind-Value="_model.Besitzer" />
+        </div>
+    </fieldset>
+
+    <button type="submit">Daten anzeigen</button>
+</EditForm>
+
+@if (_summary is not null)
+{
+    <h4>Zusammenfassung</h4>
+    <pre>@_summary</pre>
+}
+
+@code {
+    // nur für das Formular – NICHT dein ViewModel!
+    private class FahrzeugFormModel
+    {
+        public string FahrerVorname { get; set; } = "";
+        public string FahrerNachname { get; set; } = "";
+        public bool HatFuehrerschein { get; set; }
+
+        public string KundeVorname { get; set; } = "";
+        public string KundeNachname { get; set; } = "";
+
+        public string AutoMarke { get; set; } = "";
+        public string Besitzer { get; set; } = "";
+    }
+
+    private FahrzeugFormModel _model = new();
+    private string? _summary;
+
+    private void OnSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(_model.FahrerVorname) ||
+            string.IsNullOrWhiteSpace(_model.FahrerNachname) ||
+            string.IsNullOrWhiteSpace(_model.AutoMarke))
+        {
+            _summary = "Bitte mindestens Fahrer (Vor- und Nachname) und Auto-Marke eingeben.";
+            return;
+        }
+
+        var besitzerName = string.IsNullOrWhiteSpace(_model.Besitzer)
+            ? $"{_model.FahrerVorname} {_model.FahrerNachname}"
+            : _model.Besitzer;
+
+        // Hier nutzen wir deine alten Klassen mit Namespace
+        var fahrer = new Fahrer(_model.FahrerVorname,
+                                         _model.FahrerNachname,
+                                         _model.HatFuehrerschein);
+
+        var kunde  = new Kunde(_model.KundeVorname,
+                                        _model.KundeNachname);
+
+        var auto   = new Auto(_model.AutoMarke,
+                                       $"{fahrer.Vorname} {fahrer.Nachname}",
+                                       besitzerName);
+
+        var vm = new ViewModel
+        {
+            Marke             = auto.autoMarke,
+            Fahrer            = $"{fahrer.Vorname} {fahrer.Nachname}",
+            Besitzer          = auto.besitzer,
+            FuehrerscheinInfo = fahrer.HatFuehrerschein ? "Ja" : "Nein",
+            Kunde             = $"{kunde.Vorname} {kunde.Nachname}"
+        };
+
+        _summary =
+            $"Fahrer: {vm.Fahrer} (Führerschein: {vm.FuehrerscheinInfo})\n" +
+            $"Kunde : {vm.Kunde}\n" +
+            $"Auto  : {vm.Marke}\n" +
+            $"Besitzer: {vm.Besitzer}";
+    }
+}
