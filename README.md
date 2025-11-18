@@ -38,28 +38,36 @@ Alle Daten laufen vollständig **clientseitig** im Browser per WebAssembly.
 
 ## 📁 Projektstruktur
 
-Models/
-├── Person.cs
-├── Fahrer.cs
-├── Kunde.cs
-├── Auto.cs
-└── ViewModel.cs
-
-Pages/
-├── Fahrzeug.razor → Fahrzeug-Eingabe, Liste & Sortierung
-├── Weather.razor → Neue Wetterseite mit Sortierung
-└── Index.razor
-
-Shared/
-├── MainLayout.razor
-└── NavMenu.razor
-
-wwwroot/
-├── css/
-└── index.html
-
-Program.cs → Blazor-Konfiguration
-App.razor → Routing
+```plaintext
+KlasseAuto.Blazor/
+│
+├── Models/
+│   ├── Person.cs
+│   ├── Fahrer.cs
+│   ├── Kunde.cs
+│   ├── Auto.cs
+│   └── ViewModel.cs
+│
+├── Pages/
+│   ├── Fahrzeug.razor          → Fahrzeug-Eingabe, Liste & Sortierung
+│   ├── Weather.razor           → Neue Wetterseite mit Sortierung
+│   ├── Index.razor
+│   └── Counter.razor (falls Standard)
+│
+├── Shared/
+│   ├── MainLayout.razor
+│   └── NavMenu.razor
+│
+├── wwwroot/
+│   ├── css/
+│   ├── favicon.ico
+│   ├── index.html              → wichtig für GitHub Pages (<base href="...">)
+│   └── appsettings.json (wenn vorhanden)
+│
+├── App.razor                   → Routing
+├── Program.cs                  → Blazor-Konfiguration
+├── KlasseAuto.Blazor.csproj    → Projekt-Datei
+└── README.md                   → Projektdokumentation
 
 
 ---
