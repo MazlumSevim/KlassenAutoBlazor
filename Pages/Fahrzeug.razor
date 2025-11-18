@@ -56,17 +56,64 @@
         </div>
     </fieldset>
 
-    <button type="submit">Daten anzeigen</button>
+    <button type="submit">Daten hinzufügen</button>
+    <button type="button" style="margin-left:1rem;" @onclick="ClearForm">Formular leeren</button>
 </EditForm>
 
-@if (_summary is not null)
+@if (!string.IsNullOrWhiteSpace(_lastMessage))
 {
-    <h4>Zusammenfassung</h4>
-    <pre>@_summary</pre>
+    <p style="margin-top:0.5rem;">@_lastMessage</p>
+}
+
+<hr />
+
+<h4>Gespeicherte Fahrzeuge (@_fahrzeuge.Count)</h4>
+
+@if (_fahrzeuge.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th @onclick="@(() => SortBy(nameof(ViewModel.Marke)))" style="cursor:pointer;">
+                    Marke @SortIndicator(nameof(ViewModel.Marke))
+                </th>
+                <th @onclick="@(() => SortBy(nameof(ViewModel.Fahrer)))" style="cursor:pointer;">
+                    Fahrer @SortIndicator(nameof(ViewModel.Fahrer))
+                </th>
+                <th @onclick="@(() => SortBy(nameof(ViewModel.Kunde)))" style="cursor:pointer;">
+                    Kunde @SortIndicator(nameof(ViewModel.Kunde))
+                </th>
+                <th @onclick="@(() => SortBy(nameof(ViewModel.Besitzer)))" style="cursor:pointer;">
+                    Besitzer @SortIndicator(nameof(ViewModel.Besitzer))
+                </th>
+                <th @onclick="@(() => SortBy(nameof(ViewModel.FuehrerscheinInfo)))" style="cursor:pointer;">
+                    Führerschein @SortIndicator(nameof(ViewModel.FuehrerscheinInfo))
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in SortedFahrzeuge)
+            {
+                <tr>
+                    <td>@f.Marke</td>
+                    <td>@f.Fahrer</td>
+                    <td>@f.Kunde</td>
+                    <td>@f.Besitzer</td>
+                    <td>@f.FuehrerscheinInfo</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="button" @onclick="ClearList">Liste löschen</button>
+}
+else
+{
+    <p>Noch keine Fahrzeuge gespeichert.</p>
 }
 
 @code {
-    // nur für das Formular – NICHT dein ViewModel!
+    // Formular-Daten (nur für die Eingabe)
     private class FahrzeugFormModel
     {
         public string FahrerVorname { get; set; } = "";
@@ -81,7 +128,59 @@
     }
 
     private FahrzeugFormModel _model = new();
-    private string? _summary;
+    private string? _lastMessage;
+
+    // Liste aller Fahrzeuge (ViewModels)
+    private List<ViewModel> _fahrzeuge = new();
+
+    // Sortierzustand
+    private string _sortColumn = nameof(ViewModel.Marke);
+    private bool _sortAscending = true;
+
+    private IEnumerable<ViewModel> SortedFahrzeuge =>
+        _sortColumn switch
+        {
+            nameof(ViewModel.Marke) =>
+                _sortAscending ? _fahrzeuge.OrderBy(f => f.Marke)
+                               : _fahrzeuge.OrderByDescending(f => f.Marke),
+
+            nameof(ViewModel.Fahrer) =>
+                _sortAscending ? _fahrzeuge.OrderBy(f => f.Fahrer)
+                               : _fahrzeuge.OrderByDescending(f => f.Fahrer),
+
+            nameof(ViewModel.Kunde) =>
+                _sortAscending ? _fahrzeuge.OrderBy(f => f.Kunde)
+                               : _fahrzeuge.OrderByDescending(f => f.Kunde),
+
+            nameof(ViewModel.Besitzer) =>
+                _sortAscending ? _fahrzeuge.OrderBy(f => f.Besitzer)
+                               : _fahrzeuge.OrderByDescending(f => f.Besitzer),
+
+            nameof(ViewModel.FuehrerscheinInfo) =>
+                _sortAscending ? _fahrzeuge.OrderBy(f => f.FuehrerscheinInfo)
+                               : _fahrzeuge.OrderByDescending(f => f.FuehrerscheinInfo),
+
+            _ => _fahrzeuge
+        };
+
+    private void SortBy(string column)
+    {
+        if (_sortColumn == column)
+        {
+            _sortAscending = !_sortAscending;
+        }
+        else
+        {
+            _sortColumn = column;
+            _sortAscending = true;
+        }
+    }
+
+    private string SortIndicator(string column)
+    {
+        if (_sortColumn != column) return "";
+        return _sortAscending ? "▲" : "▼";
+    }
 
     private void OnSubmit()
     {
@@ -89,7 +188,7 @@
             string.IsNullOrWhiteSpace(_model.FahrerNachname) ||
             string.IsNullOrWhiteSpace(_model.AutoMarke))
         {
-            _summary = "Bitte mindestens Fahrer (Vor- und Nachname) und Auto-Marke eingeben.";
+            _lastMessage = "Bitte mindestens Fahrer (Vor- und Nachname) und Auto-Marke eingeben.";
             return;
         }
 
@@ -97,17 +196,17 @@
             ? $"{_model.FahrerVorname} {_model.FahrerNachname}"
             : _model.Besitzer;
 
-        // Hier nutzen wir deine alten Klassen mit Namespace
+        // Deine Domänen-Klassen nutzen
         var fahrer = new Fahrer(_model.FahrerVorname,
-                                         _model.FahrerNachname,
-                                         _model.HatFuehrerschein);
+                                _model.FahrerNachname,
+                                _model.HatFuehrerschein);
 
-        var kunde  = new Kunde(_model.KundeVorname,
-                                        _model.KundeNachname);
+        var kunde = new Kunde(_model.KundeVorname,
+                              _model.KundeNachname);
 
-        var auto   = new Auto(_model.AutoMarke,
-                                       $"{fahrer.Vorname} {fahrer.Nachname}",
-                                       besitzerName);
+        var auto = new Auto(_model.AutoMarke,
+                            $"{fahrer.Vorname} {fahrer.Nachname}",
+                            besitzerName);
 
         var vm = new ViewModel
         {
@@ -118,10 +217,20 @@
             Kunde             = $"{kunde.Vorname} {kunde.Nachname}"
         };
 
-        _summary =
-            $"Fahrer: {vm.Fahrer} (Führerschein: {vm.FuehrerscheinInfo})\n" +
-            $"Kunde : {vm.Kunde}\n" +
-            $"Auto  : {vm.Marke}\n" +
-            $"Besitzer: {vm.Besitzer}";
+        _fahrzeuge.Add(vm);
+
+        _lastMessage = "Fahrzeug hinzugefügt.";
+    }
+
+    private void ClearForm()
+    {
+        _model = new FahrzeugFormModel();
+        _lastMessage = null;
+    }
+
+    private void ClearList()
+    {
+        _fahrzeuge.Clear();
+        _lastMessage = "Liste geleert.";
     }
 }
