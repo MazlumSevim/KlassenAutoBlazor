@@ -3,8 +3,16 @@
 @using System.IO
 @using System.Text
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@using System.Linq
+@using Microsoft.AspNetCore.Components
 
+
+<div class="fahrzeug-page">
+
+<section class="card-box">
 <h3>Fahrzeug / Fahrer / Kunde</h3>
+
 
 <EditForm Model="_model" OnValidSubmit="OnSubmit">
     <DataAnnotationsValidator />
@@ -14,68 +22,99 @@
 
 
 
-    <fieldset style="margin-bottom:1rem;">
-        <legend>Fahrer</legend>
+        <div class="fahrzeug-form-grid">
 
-        <div>
-            <label style="display:inline-block; width:120px;">Vorname:</label>
-            <InputText @bind-Value="_model.FahrerVorname" />
-        </div>
+       <fieldset style="margin-bottom:1rem;">
+    <legend>Fahrer</legend>
 
-        <div>
-            <label style="display:inline-block; width:120px;">Nachname:</label>
-            <InputText @bind-Value="_model.FahrerNachname" />
-        </div>
+    <div>
+        <label style="display:inline-block; width:120px;">Vorname:</label>
+        <input class="form-Control" 
+                @bind="_model.FahrerVorname"
+                @ref="_fahrerVornameRef"
+                @onkeydown="@(e => HandleEnter(e, _fahrerNachnameRef))"/>
+    </div>
 
-        <div>
-            <label>
-                <InputCheckbox @bind-Value="_model.HatFuehrerschein" />
-                Hat Führerschein
-            </label>
-        </div>
-    </fieldset>
+    <div>
+        <label style="display:inline-block; width:120px;">Nachname:</label>
+        <input class="form-Control" 
+                @bind="_model.FahrerNachname"
+                @ref="_fahrerNachnameRef"
+                @onkeydown="@(e => HandleEnter(e, _kundeVornameRef))" />
+    </div>
 
-    <fieldset style="margin-bottom:1rem;">
-        <legend>Kunde</legend>
+    <div>
+        <label>
+            <input type="checkbox" 
+                    @bind="_model.HatFuehrerschein" />
+            Hat Führerschein
+        </label>
+    </div>
+</fieldset>
 
-        <div>
-            <label style="display:inline-block; width:120px;">Vorname:</label>
-            <InputText @bind-Value="_model.KundeVorname" />
-        </div>
+<fieldset style="margin-bottom:1rem;">
+    <legend>Kunde</legend>
 
-        <div>
-            <label style="display:inline-block; width:120px;">Nachname:</label>
-            <InputText @bind-Value="_model.KundeNachname" />
-        </div>
-    </fieldset>
+    <div>
+        <label style="display:inline-block; width:120px;">Vorname:</label>
+        <input class="form-Control" 
+                @bind="_model.KundeVorname"
+                @ref="_kundeVornameRef"
+                @onkeydown="@(e => HandleEnter(e, _kundeNachnameRef))" />
+    </div>
 
-    <fieldset style="margin-bottom:1rem;">
-        <legend>Auto</legend>
+    <div>
+        <label style="display:inline-block; width:120px;">Nachname:</label>
+        <input class="form-Control" 
+                @bind="_model.KundeNachname"
+                @ref="_kundeNachnameRef"
+                @onkeydown="@(e => HandleEnter(e, _autoMarkeRef))"/>
+    </div>
+</fieldset>
 
-        <div>
-            <label style="display:inline-block; width:120px;">Marke:</label>
-            <InputText @bind-Value="_model.AutoMarke" />
-        </div>
+<fieldset style="margin-bottom:1rem;">
+    <legend>Auto</legend>
 
-        <div>
-            <label style="display:inline-block; width:120px;">Besitzer (optional):</label>
-            <InputText @bind-Value="_model.Besitzer" />
-        </div>
-    </fieldset>
+    <div>
+        <label style="display:inline-block; width:120px;">Marke:</label>
+        <input class="form-Control" 
+                @bind="_model.AutoMarke"
+                @ref="_autoMarkeRef"
+                @onkeydown="@(e => HandleEnter(e, _besitzerRef))"/>
+    </div>
 
-    <button type="submit">Daten hinzufügen</button>
-    <button type="button" style="margin-left:1rem;" @onclick="ClearForm">Formular leeren</button>
+    <div>
+        <label style="display:inline-block; width:120px;">Besitzer (optional):</label>
+        <input class="form-Control" 
+                @bind="_model.Besitzer"
+                @ref="_besitzerRef"/>
+                @* HIER KEIN HandleEnter -> Enter schickt das Formular ab *@
+    </div>
+</fieldset>
+
+    </div>
+
+
+        <div class="fahrzeug-buttons">
+        <button type="submit" class="btn btn-primary">
+            Daten hinzufügen
+        </button>
+        <button type="button" class="btn btn-secondary" @onclick="ClearForm">
+            Formular leeren
+        </button>
+    </div>
+
 </EditForm>
 
 @if (!string.IsNullOrWhiteSpace(_lastMessage))
 {
     <p style="margin-top:0.5rem;">@_lastMessage</p>
 }
+</section>
 
 <hr />
-
+<section>
 <h4>Gespeicherte Fahrzeuge (@_fahrzeuge.Count)</h4>
-
 @if (_fahrzeuge.Any())
 {
     <table class="table">
@@ -98,6 +137,7 @@
                 </th>
             </tr>
         </thead>
+        
         <tbody>
             @foreach (var f in SortedFahrzeuge)
             {
@@ -111,9 +151,7 @@
             }
         </tbody>
     </table>
-
     <hr />
-
 <h4>CSV-Import / Export</h4>
 
 <div class="mb-2">
@@ -147,10 +185,11 @@
 else
 {
     <p>Noch keine Fahrzeuge gespeichert.</p>
-
     <hr />
 
+
 <h4>CSV-Import / Export</h4>
+
 
 <div class="mb-2">
     <button type="button" class="btn btn-secondary btn-sm" @onclick="GenerateCsv">
@@ -178,9 +217,29 @@ else
 }
 
 }
+</section>
+</div>
+
 
 @code {
-      private string? _csvDownloadUrl;
+
+    // Referenzen auf die Eingabefelder
+private ElementReference _fahrerVornameRef;
+private ElementReference _fahrerNachnameRef;
+private ElementReference _kundeVornameRef;
+private ElementReference _kundeNachnameRef;
+private ElementReference _autoMarkeRef;
+private ElementReference _besitzerRef;
+
+private void  HandleEnter(KeyboardEventArgs e, ElementReference nextRef)
+{
+    if (e.Key == "Enter")
+    {
+        _= nextRef.FocusAsync();
+    }
+}
+
+    private string? _csvDownloadUrl;
     private string? _lastCsvMessage;
 
     private void GenerateCsv()
@@ -297,55 +356,49 @@ private async Task OnCsvUpload(InputFileChangeEventArgs e)
 
     // Sortierzustand
     private string _sortColumn = nameof(ViewModel.Marke);
-    private bool _sortAscending = true;
+private bool _sortAscending = true;
 
-    private IEnumerable<ViewModel> SortedFahrzeuge =>
-        _sortColumn switch
-        {
-            nameof(ViewModel.Marke) =>
-                _sortAscending ? _fahrzeuge.OrderBy(f => f.Marke)
-                               : _fahrzeuge.OrderByDescending(f => f.Marke),
-
-            nameof(ViewModel.Fahrer) =>
-                _sortAscending ? _fahrzeuge.OrderBy(f => f.Fahrer)
-                               : _fahrzeuge.OrderByDescending(f => f.Fahrer),
-
-            nameof(ViewModel.Kunde) =>
-                _sortAscending ? _fahrzeuge.OrderBy(f => f.Kunde)
-                               : _fahrzeuge.OrderByDescending(f => f.Kunde),
-
-            nameof(ViewModel.Besitzer) =>
-                _sortAscending ? _fahrzeuge.OrderBy(f => f.Besitzer)
-                               : _fahrzeuge.OrderByDescending(f => f.Besitzer),
-
-            nameof(ViewModel.FuehrerscheinInfo) =>
-                _sortAscending ? _fahrzeuge.OrderBy(f => f.FuehrerscheinInfo)
-                               : _fahrzeuge.OrderByDescending(f => f.FuehrerscheinInfo),
-
-            _ => _fahrzeuge
-        };
-
-
-        
-
-    private void SortBy(string column)
+private void SortBy(string column)
+{
+    if (_sortColumn == column)
     {
-        if (_sortColumn == column)
-        {
-            _sortAscending = !_sortAscending;
-        }
-        else
-        {
-            _sortColumn = column;
-            _sortAscending = true;
-        }
+        // Gleiche Spalte -> Richtung umdrehen
+        _sortAscending = !_sortAscending;
     }
-
-    private string SortIndicator(string column)
+    else
     {
-        if (_sortColumn != column) return "";
-        return _sortAscending ? "▲" : "▼";
+        // Neue Spalte -> aufsteigend starten
+        _sortColumn = column;
+        _sortAscending = true;
     }
+}
+
+private IEnumerable<ViewModel> SortedFahrzeuge =>
+    _sortColumn switch
+    {
+        nameof(ViewModel.Marke)           => SortByKey(_fahrzeuge, f => f.Marke),
+        nameof(ViewModel.Fahrer)          => SortByKey(_fahrzeuge, f => f.Fahrer),
+        nameof(ViewModel.Kunde)           => SortByKey(_fahrzeuge, f => f.Kunde),
+        nameof(ViewModel.Besitzer)        => SortByKey(_fahrzeuge, f => f.Besitzer),
+        nameof(ViewModel.FuehrerscheinInfo) => SortByKey(_fahrzeuge, f => f.FuehrerscheinInfo),
+        _                                  => _fahrzeuge
+    };
+
+private IEnumerable<ViewModel> SortByKey<TKey>(IEnumerable<ViewModel> source, Func<ViewModel, TKey> keySelector)
+{
+    return _sortAscending
+        ? source.OrderBy(keySelector)
+        : source.OrderByDescending(keySelector);
+}
+
+private MarkupString SortIndicator(string column)
+{
+    if (_sortColumn != column)
+        return (MarkupString)string.Empty;
+
+    var symbol = _sortAscending ? "▲" : "▼";
+    return (MarkupString)$" {symbol}";
+}
 
     private void OnSubmit()
     {

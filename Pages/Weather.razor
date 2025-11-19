@@ -1,21 +1,27 @@
 ﻿@page "/weather"
 @using System.Globalization
 @using KlasseAuto.Blazor.Data
+@using Microsoft.AspNetCore.Components.Web
 @inject WeatherApiService WeatherService
 
 <h3>Wetter – mehrere Städte</h3>
 
 <div class="mb-3">
-    <label for="cityInput">Neue Stadt:</label>
-    <input id="cityInput"
-           class="form-control"
-           style="max-width:250px; display:inline-block; margin-right:0.5rem;"
-           @bind="_newCity" />
+    <form class="weather-form" @onsubmit="HandleCitySubmit">
+        <label for="cityInput">Neue Stadt:</label>
+        <div class="d-flex gap-2 align-items-center">
+            <input id="cityInput"
+                   class="form-control"
+                   style="max-width:260px;"
+                   @bind="_newCity" />
 
-    <button type="button" class="btn btn-primary" @onclick="AddCity">
-        Stadt hinzufügen
-    </button>
+            <button type="submit" class="btn btn-primary">
+                Stadt hinzufügen
+            </button>
+        </div>
+    </form>
 </div>
+
 
 @if (!string.IsNullOrEmpty(_globalError))
 {
@@ -127,6 +133,16 @@ else
 }
 
 @code {
+
+    private async Task HandleCitySubmit()
+{
+    // Wenn du AddCity als async Task hast:
+    await AddCity();
+
+    // Falls AddCity bei dir "void" ist, dann:
+    // AddCity();
+}
+
     private string _newCity = string.Empty;
     private string? _globalError;
     private readonly List<CityWeatherViewModel> _cities = new();

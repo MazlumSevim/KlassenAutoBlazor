@@ -132,3 +132,117 @@ code {
     /* Icons etwas „abheben“ lassen */
     filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7));
 }
+
+.navbar-custom {
+    background-color: #1f2937; /* dunkles Grau/Blau – such dir was aus :) */
+    color: #f9fafb;
+}
+
+.navbar-custom .nav-link {
+    color: #f9fafb;
+}
+
+.navbar-custom .nav-link.active {
+    font-weight: 600;
+    text-decoration: underline;
+}
+/* === Fahrzeug-Seite schöner machen === */
+
+.fahrzeug-page {
+    max-width: 980px;
+    margin: 2rem auto;
+    padding: 0 1rem 3rem;
+}
+
+.fahrzeug-page h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* Karten für Bereiche: Formular, Liste, CSV */
+.fahrzeug-page section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 12px 25px rgba(15, 23, 42, 0.12);
+    margin-bottom: 1.5rem;
+}
+
+/* Überschriften in den Sektionen (Fahrer, Kunde, Auto, CSV, Gespeicherte Fahrzeuge) */
+.fahrzeug-page h4,
+.fahrzeug-page h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+/* Labels & Inputs enger zusammen, aber übersichtlich */
+.fahrzeug-page label {
+    font-weight: 500;
+    margin-top: 0.5rem;
+    display: inline-block;
+}
+
+.fahrzeug-page input[type="text"],
+.fahrzeug-page input[type="number"],
+.fahrzeug-page input[type="email"] {
+    max-width: 380px;
+}
+
+/* Buttons moderner */
+.fahrzeug-page button,
+.fahrzeug-page input[type="button"],
+.fahrzeug-page input[type="submit"] {
+    border-radius: 999px;
+    padding: 0.35rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+.fahrzeug-page .btn-primary,
+.fahrzeug-page button[type="submit"] {
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    border: none;
+}
+
+.fahrzeug-page .btn-secondary {
+    background-color: #6b7280;
+    border: none;
+}
+
+/* Tabelle der gespeicherten Fahrzeuge */
+.fahrzeug-page table {
+    font-size: 0.9rem;
+}
+
+.fahrzeug-page table thead {
+    background: #f3f4f6;
+}
+
+.fahrzeug-page table tbody tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+/* Grid für Fahrer / Kunde / Auto */
+.fahrzeug-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem 1.8rem;
+}
+
+/* Button-Reihe unten */
+.fahrzeug-buttons {
+    margin-top: 0.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+.weather-form label {
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+.weather-form .form-control {
+    max-width: 260px;
+}
