@@ -27,8 +27,8 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      - name: Publish
-        run: dotnet publish -c Release -o build
+      - name: Publish Blazor project
+        run: dotnet publish KlasseAuto.Blazor.csproj -c Release -o build
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
