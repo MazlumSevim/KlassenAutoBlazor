@@ -1074,10 +1074,10 @@ C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\K
 C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\ref\KlasseAuto.Blazor.dll
 C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\KlasseAuto.Blazor.sourcelink.json
 C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\compressed\lcf7qmyfza-m2sttubw9a.gz
-C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\bin\Debug\net9.0\wwwroot\_framework\KlasseAuto.Blazor.2ui5lboshb.wasm
-C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\bin\Debug\net9.0\wwwroot\_framework\KlasseAuto.Blazor.tepyld943p.pdb
-C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\bin\Debug\net9.0\wwwroot\_framework\KlasseAuto.Blazor.2ui5lboshb.wasm.gz
-C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\bin\Debug\net9.0\wwwroot\_framework\KlasseAuto.Blazor.tepyld943p.pdb.gz
-C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\compressed\ppbvuzl300-2ui5lboshb.gz
-C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\compressed\lucg0vkauo-tepyld943p.gz
-C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\compressed\q6op2fbphz-qurtq4httw.gz
+C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\bin\Debug\net9.0\wwwroot\_framework\KlasseAuto.Blazor.siucn35o4l.wasm
+C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\bin\Debug\net9.0\wwwroot\_framework\KlasseAuto.Blazor.kn3p3k4hfp.pdb
+C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\bin\Debug\net9.0\wwwroot\_framework\KlasseAuto.Blazor.siucn35o4l.wasm.gz
+C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\bin\Debug\net9.0\wwwroot\_framework\KlasseAuto.Blazor.kn3p3k4hfp.pdb.gz
+C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\compressed\ppbvuzl300-siucn35o4l.gz
+C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\compressed\lucg0vkauo-kn3p3k4hfp.gz
+C:\Users\ma.sevim\OneDrive - GPB\Desktop\C#\KlasseAuto.Blazor\obj\Debug\net9.0\compressed\q6op2fbphz-mdvicriqso.gz

@@ -1,11 +1,18 @@
 @page "/fahrzeug"
 @using KlasseAuto.Blazor.Models
+@using System.IO
+@using System.Text
+@using Microsoft.AspNetCore.Components.Forms
 
 <h3>Fahrzeug / Fahrer / Kunde</h3>
 
 <EditForm Model="_model" OnValidSubmit="OnSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
+
+ 
+
+
 
     <fieldset style="margin-bottom:1rem;">
         <legend>Fahrer</legend>
@@ -105,14 +112,169 @@
         </tbody>
     </table>
 
+    <hr />
+
+<h4>CSV-Import / Export</h4>
+
+<div class="mb-2">
+    <button type="button" class="btn btn-secondary btn-sm" @onclick="GenerateCsv">
+        CSV für Export vorbereiten
+    </button>
+
+    @if (!string.IsNullOrEmpty(_csvDownloadUrl))
+    {
+        <a class="btn btn-success btn-sm ms-2"
+           href="@_csvDownloadUrl"
+           download="fahrzeuge.csv">
+            CSV herunterladen
+        </a>
+    }
+</div>
+
+<div class="mb-2">
+    <label>CSV importieren:</label>
+    <InputFile OnChange="OnCsvUpload" accept=".csv,text/csv" />
+</div>
+
+@if (!string.IsNullOrEmpty(_lastCsvMessage))
+{
+    <p>@_lastCsvMessage</p>
+}
+
+
     <button type="button" @onclick="ClearList">Liste löschen</button>
 }
 else
 {
     <p>Noch keine Fahrzeuge gespeichert.</p>
+
+    <hr />
+
+<h4>CSV-Import / Export</h4>
+
+<div class="mb-2">
+    <button type="button" class="btn btn-secondary btn-sm" @onclick="GenerateCsv">
+        CSV für Export vorbereiten
+    </button>
+
+    @if (!string.IsNullOrEmpty(_csvDownloadUrl))
+    {
+        <a class="btn btn-success btn-sm ms-2"
+           href="@_csvDownloadUrl"
+           download="fahrzeuge.csv">
+            CSV herunterladen
+        </a>
+    }
+</div>
+
+<div class="mb-2">
+    <label>CSV importieren:</label>
+    <InputFile OnChange="OnCsvUpload" accept=".csv,text/csv" />
+</div>
+
+@if (!string.IsNullOrEmpty(_lastCsvMessage))
+{
+    <p>@_lastCsvMessage</p>
+}
+
 }
 
 @code {
+      private string? _csvDownloadUrl;
+    private string? _lastCsvMessage;
+
+    private void GenerateCsv()
+{
+    if (!_fahrzeuge.Any())
+    {
+        _lastCsvMessage = "Keine Fahrzeuge zum Export.";
+        _csvDownloadUrl = null;
+        return;
+    }
+
+    var sb = new StringBuilder();
+
+    // Kopfzeile
+    sb.AppendLine("Marke;Fahrer;Kunde;Besitzer;Fuehrerschein");
+
+    foreach (var f in _fahrzeuge)
+    {
+        // Hier gehen wir davon aus, dass dein ViewModel diese Properties hat:
+        // Marke, Fahrer, Kunde, Besitzer, FuehrerscheinInfo
+        sb.AppendLine($"{f.Marke};{f.Fahrer};{f.Kunde};{f.Besitzer};{f.FuehrerscheinInfo}");
+    }
+
+    var csv = sb.ToString();
+    var bytes = Encoding.UTF8.GetBytes(csv);
+    var base64 = Convert.ToBase64String(bytes);
+
+    _csvDownloadUrl = $"data:text/csv;base64,{base64}";
+    _lastCsvMessage = $"CSV mit {_fahrzeuge.Count} Einträgen vorbereitet.";
+}
+
+private async Task OnCsvUpload(InputFileChangeEventArgs e)
+{
+    var file = e.File;
+    if (file is null)
+    {
+        _lastCsvMessage = "Keine Datei ausgewählt.";
+        return;
+    }
+
+    try
+    {
+        using var stream = file.OpenReadStream(1024 * 1024); // max. 1 MB
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+        var content = await reader.ReadToEndAsync();
+
+        var lines = content
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(l => l.Trim('\r'))   // Windows-Zeilenende säubern
+            .ToArray();
+
+        if (lines.Length <= 1)
+        {
+            _lastCsvMessage = "CSV enthält keine Daten.";
+            return;
+        }
+
+        // Alte Liste leeren
+        _fahrzeuge.Clear();
+
+        // Erste Zeile = Header, ab Zeile 1 einlesen
+        for (int i = 1; i < lines.Length; i++)
+        {
+            var line = lines[i];
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            var cols = line.Split(';');
+            if (cols.Length < 5)
+                continue; // ungültige Zeile überspringen
+
+            var vm = new ViewModel
+            {
+                Marke = cols[0],
+                Fahrer = cols[1],
+                Kunde = cols[2],
+                Besitzer = cols[3],
+                FuehrerscheinInfo = cols[4]
+            };
+
+            _fahrzeuge.Add(vm);
+        }
+
+        _lastCsvMessage = $"CSV importiert: {_fahrzeuge.Count} Fahrzeuge geladen.";
+    }
+    catch (Exception ex)
+    {
+        _lastCsvMessage = $"Fehler beim Import: {ex.Message}";
+    }
+}
+   
+   
+   
+   
     // Formular-Daten (nur für die Eingabe)
     private class FahrzeugFormModel
     {
@@ -162,6 +324,9 @@ else
 
             _ => _fahrzeuge
         };
+
+
+        
 
     private void SortBy(string column)
     {
