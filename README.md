@@ -80,3 +80,6 @@ KlasseAuto.Blazor/
 dotnet restore
 dotnet build
 dotnet run
+
+🔗 Live-Demo: https://mazlumsevim.github.io/KlassenAutoBlazor/
+
