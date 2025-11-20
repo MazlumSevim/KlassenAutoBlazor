@@ -1,3 +1,6 @@
+// C#-Code-Datei.
+// - Enthält Logik oder Datenmodelle für das Projekt.
+
 using System.Net.Http.Json;
 
 namespace KlasseAuto.Blazor.Data;

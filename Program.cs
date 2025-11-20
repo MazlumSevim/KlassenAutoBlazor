@@ -1,3 +1,8 @@
+// Dieses File startet die Blazor-Anwendung.
+// - Hier wird der WebAssemblyHost gebaut.
+// - Services (z.B. HttpClient) werden registriert.
+// - Am Ende wird die App im Browser gestartet.
+
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using KlasseAuto.Blazor;

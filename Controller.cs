@@ -1,3 +1,7 @@
+// Diese Klasse enthält Hilfsmethoden/Logik für das Projekt.
+// - Verarbeitet Auto-Daten.
+// - Baut ViewModel/DTO-Objekte für die Anzeige.
+
 using System;
 
 namespace KlasseAuto.Blazor.Models;
