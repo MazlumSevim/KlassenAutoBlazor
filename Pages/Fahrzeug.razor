@@ -10,6 +10,8 @@
 @using Microsoft.AspNetCore.Components.Web
 @using System.Linq
 @using Microsoft.AspNetCore.Components
+@inject KlasseAuto.Blazor.Data.SupabaseAutoService SupaService
+
 
 
 <div class="fahrzeug-page">
@@ -100,7 +102,7 @@
 
 
         <div class="fahrzeug-buttons">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-primary" @onclick="SpeichernAsync">
             Daten hinzufügen
         </button>
         <button type="button" class="btn btn-secondary" @onclick="ClearForm">
@@ -224,6 +226,29 @@ else
 </section>
 </div>
 
+<table class="table">
+    <thead>
+        <tr>
+            <th>Marke</th>
+            <th>Modell</th>
+            <th>Baujahr</th>
+            <th>Kilometer</th>
+            <th>Besitzer</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in autos)
+        {
+            <tr>
+                <td>@a.autoMarke</td>
+                <td>@a.fahrer</td>
+                <td>@a.besitzer</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
 
 @code {
 
@@ -234,6 +259,30 @@ private ElementReference _kundeVornameRef;
 private ElementReference _kundeNachnameRef;
 private ElementReference _autoMarkeRef;
 private ElementReference _besitzerRef;
+
+ private Auto auto = new Auto();
+    private List<Auto> autos = new List<Auto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Beim Laden der Seite alle Autos aus Supabase holen
+        autos = await SupaService.GetAutosAsync();
+    }
+
+    private async Task SpeichernAsync()
+    {
+        // Auto zu Supabase schicken
+        var saved = await SupaService.AddAutoAsync(auto);
+
+        if (saved != null)
+        {
+            // Liste aktualisieren
+            autos.Add(saved);
+
+            // Formular leeren, wenn du willst
+            auto = new Auto();
+        }
+    }
 
 private void  HandleEnter(KeyboardEventArgs e, ElementReference nextRef)
 {

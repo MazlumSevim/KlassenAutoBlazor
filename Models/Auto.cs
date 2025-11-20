@@ -8,6 +8,11 @@ namespace KlasseAuto.Blazor.Models;
 
 public class Auto
 {
+       // Parameterloser Konstruktor für Blazor / Binding
+    public Auto()
+    {
+    }
+
         // Automarke, z.B. BMW, VW, Mercedes
     public string autoMarke { get; set; }
     public string fahrer { get; set; }
