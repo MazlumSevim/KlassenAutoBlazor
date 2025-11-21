@@ -43,31 +43,41 @@ public class SupabaseAutoService
     }
 
     // Ein Auto in Supabase speichern
-    public async Task<Auto?> AddAutoAsync(Auto auto)
+   public async Task<Auto?> AddAutoAsync(Auto auto)
+{
+    var json = JsonSerializer.Serialize(new
     {
-        // JSON-Objekt bauen, Felder müssen zu deiner Supabase-Tabelle passen
-        var json = JsonSerializer.Serialize(new
-        {
-            autoMarke = auto.autoMarke,
-            fahrer = auto.fahrer,
-            besitzer = auto.besitzer
-        });
+        autoMarke = auto.autoMarke,
+        fahrer = auto.fahrer,
+        besitzer = auto.besitzer
+    });
 
-        var request = new HttpRequestMessage(
-            HttpMethod.Post,
-            $"{SupabaseUrl}/rest/v1/autos"
-        );
+    var request = new HttpRequestMessage(
+        HttpMethod.Post,
+        $"{SupabaseUrl}/rest/v1/autos"
+    );
 
-        request.Headers.Add("apikey", SupabaseAnonKey);
-        request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
-        request.Headers.Add("Prefer", "return=representation"); // gespeichertes Objekt zurückgeben
+    request.Headers.Add("apikey", SupabaseAnonKey);
+    request.Headers.Add("Authorization", $"Bearer {SupabaseAnonKey}");
+    request.Headers.Add("Prefer", "return=representation");
 
-        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+    request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
+    var response = await _httpClient.SendAsync(request);
+    var body = await response.Content.ReadAsStringAsync();
 
-        var autos = await response.Content.ReadFromJsonAsync<List<Auto>>();
-        return autos != null && autos.Count > 0 ? autos[0] : null;
+    // Zum Debuggen: Ausgabe in die Konsole
+    Console.WriteLine($"Supabase Status: {response.StatusCode}");
+    Console.WriteLine($"Supabase Antwort: {body}");
+
+    if (!response.IsSuccessStatusCode)
+    {
+        // Bei Fehler einfach null zurückgeben
+        return null;
     }
+
+    var autos = JsonSerializer.Deserialize<List<Auto>>(body);
+    return autos != null && autos.Count > 0 ? autos[0] : null;
+}
+
 }

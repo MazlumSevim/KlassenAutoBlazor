@@ -260,29 +260,15 @@ private ElementReference _kundeNachnameRef;
 private ElementReference _autoMarkeRef;
 private ElementReference _besitzerRef;
 
- private Auto auto = new Auto();
-    private List<Auto> autos = new List<Auto>();
+ // Autos, die in Supabase gespeichert sind
+private List<Auto> autos = new List<Auto>();
 
-    protected override async Task OnInitializedAsync()
-    {
-        // Beim Laden der Seite alle Autos aus Supabase holen
-        autos = await SupaService.GetAutosAsync();
-    }
+protected override async Task OnInitializedAsync()
+{
+    // Beim Laden der Seite alle Autos aus Supabase holen
+    autos = await SupaService.GetAutosAsync();
+}
 
-    private async Task SpeichernAsync()
-    {
-        // Auto zu Supabase schicken
-        var saved = await SupaService.AddAutoAsync(auto);
-
-        if (saved != null)
-        {
-            // Liste aktualisieren
-            autos.Add(saved);
-
-            // Formular leeren, wenn du willst
-            auto = new Auto();
-        }
-    }
 
 private void  HandleEnter(KeyboardEventArgs e, ElementReference nextRef)
 {
@@ -453,45 +439,58 @@ private MarkupString SortIndicator(string column)
     return (MarkupString)$" {symbol}";
 }
 
-    private void OnSubmit()
+   private async Task OnSubmit()
+{
+    if (string.IsNullOrWhiteSpace(_model.FahrerVorname) ||
+        string.IsNullOrWhiteSpace(_model.FahrerNachname) ||
+        string.IsNullOrWhiteSpace(_model.AutoMarke))
     {
-        if (string.IsNullOrWhiteSpace(_model.FahrerVorname) ||
-            string.IsNullOrWhiteSpace(_model.FahrerNachname) ||
-            string.IsNullOrWhiteSpace(_model.AutoMarke))
-        {
-            _lastMessage = "Bitte mindestens Fahrer (Vor- und Nachname) und Auto-Marke eingeben.";
-            return;
-        }
-
-        var besitzerName = string.IsNullOrWhiteSpace(_model.Besitzer)
-            ? $"{_model.FahrerVorname} {_model.FahrerNachname}"
-            : _model.Besitzer;
-
-        // Deine Domänen-Klassen nutzen
-        var fahrer = new Fahrer(_model.FahrerVorname,
-                                _model.FahrerNachname,
-                                _model.HatFuehrerschein);
-
-        var kunde = new Kunde(_model.KundeVorname,
-                              _model.KundeNachname);
-
-        var auto = new Auto(_model.AutoMarke,
-                            $"{fahrer.Vorname} {fahrer.Nachname}",
-                            besitzerName);
-
-        var vm = new ViewModel
-        {
-            Marke             = auto.autoMarke,
-            Fahrer            = $"{fahrer.Vorname} {fahrer.Nachname}",
-            Besitzer          = auto.besitzer,
-            FuehrerscheinInfo = fahrer.HatFuehrerschein ? "Ja" : "Nein",
-            Kunde             = $"{kunde.Vorname} {kunde.Nachname}"
-        };
-
-        _fahrzeuge.Add(vm);
-
-        _lastMessage = "Fahrzeug hinzugefügt.";
+        _lastMessage = "Bitte mindestens Fahrer (Vor- und Nachname) und Auto-Marke eingeben.";
+        return;
     }
+
+    var besitzerName = string.IsNullOrWhiteSpace(_model.Besitzer)
+        ? $"{_model.FahrerVorname} {_model.FahrerNachname}"
+        : _model.Besitzer;
+
+    // Deine Domänen-Klassen nutzen
+    var fahrer = new Fahrer(_model.FahrerVorname,
+                            _model.FahrerNachname,
+                            _model.HatFuehrerschein);
+
+    var kunde = new Kunde(_model.KundeVorname,
+                          _model.KundeNachname);
+
+    // Auto-Objekt, das zu Supabase geschickt wird
+    var autoEntity = new Auto(_model.AutoMarke,
+                              $"{fahrer.Vorname} {fahrer.Nachname}",
+                              besitzerName);
+
+    // ViewModel für deine Tabelle im UI
+    var vm = new ViewModel
+    {
+        Marke             = autoEntity.autoMarke,
+        Fahrer            = $"{fahrer.Vorname} {fahrer.Nachname}",
+        Besitzer          = autoEntity.besitzer,
+        FuehrerscheinInfo = fahrer.HatFuehrerschein ? "Ja" : "Nein",
+        Kunde             = $"{kunde.Vorname} {kunde.Nachname}"
+    };
+
+    _fahrzeuge.Add(vm);
+
+    // HIER: In Supabase speichern
+    var saved = await SupaService.AddAutoAsync(autoEntity);
+    if (saved != null)
+    {
+        // auch in der Supabase-Liste anzeigen
+        autos.Add(saved);
+        _lastMessage = "Fahrzeug hinzugefügt und in Supabase gespeichert.";
+    }
+    else
+    {
+        _lastMessage = "Fahrzeug lokal hinzugefügt, aber Speichern in Supabase ist fehlgeschlagen.";
+    }
+}
 
     private void ClearForm()
     {

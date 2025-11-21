@@ -1,0 +1,57 @@
+## Build-Ergebnisse
+bin/
+obj/
+out/
+
+## Benutzer-spezifische Dateien
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+## Visual Studio Code
+.vscode/
+.history/
+*.code-workspace
+
+## Visual Studio
+.vs/
+
+## Paket-Manager
+packages/
+*.nupkg
+*.snupkg
+
+## Logs
+*.log
+
+## Temp
+*.tmp
+*.temp
+tmp/
+
+## Rider / JetBrains
+.idea/
+*.iml
+
+## Distribution
+/dist/
+wwwroot/dist/
+
+## Geheimnisse & Konfiguration (falls vorhanden)
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Secret.json
+
+## Publish
+publish/
+*.Publish.xml
+
+## Backup-Dateien
+*.bak
+
+## macOS
+.DS_Store
+
+## Windows
+Thumbs.db

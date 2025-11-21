@@ -8,16 +8,15 @@ namespace KlasseAuto.Blazor.Models;
 
 public class Auto
 {
-       // Parameterloser Konstruktor für Blazor / Binding
+    // Parameterloser Konstruktor für Blazor / Binding
     public Auto()
     {
     }
 
-        // Automarke, z.B. BMW, VW, Mercedes
-    public string autoMarke { get; set; }
-    public string fahrer { get; set; }
-        // Name des Besitzers / der Besitzerin des Fahrzeugs
-    public string besitzer { get; set; }
+    // Standardwerte: leere Strings statt null
+    public string autoMarke { get; set; } = "";
+    public string fahrer { get; set; } = "";
+    public string besitzer { get; set; } = "";
 
     public Auto(string autoMarke, string fahrer, string besitzer)
     {
@@ -26,7 +25,6 @@ public class Auto
         this.besitzer = besitzer;
     }
 
-        // Methode mit Logik/Funktionalität für dieses Modell
     public void autoInfo()
     {
         Console.WriteLine($"Auto Marke: {autoMarke}");
